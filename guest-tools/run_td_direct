@@ -196,6 +196,7 @@ def do_run(img_path, gpus):
         '-netdev', f'user,id=nic0_td,hostfwd=tcp::{ssh_port}-:22',
         '-kernel', f'{kernel}',
         '-initrd', f'{initrd}',
+		'-append', 'root=/dev/sda1 console=ttyS0',
         '-hda', f'{img_path}',
         '-pidfile', pidfile
     ]
