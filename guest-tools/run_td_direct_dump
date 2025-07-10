@@ -55,43 +55,6 @@ if os.environ.get('OVMF_FILE'):
 else:
     tdvf_params='/usr/share/ovmf/OVMF.fd'
 
-if os.environ.get('MEMORY'):
-    memory=os.environ.get('MEMORY')
-else:
-    memory=100000
-
-if os.environ.get('CPUS'):
-    cpus=os.environ.get('CPUS')
-else:
-    cpus=32
-
-if os.environ.get('MODEL_DISK'):
-    model_disk = os.environ.get('MODEL_DISK')
-else:
-    model_disk = None
-
-if os.environ.get('CMDLINE'):
-    cmdline=os.environ.get('CMDLINE')
-else:
-    cmdline="readonly=on console=ttyS0 earlyprintk=serial root=/dev/sda2 tinfoil-debug=on tinfoil-config-hash=abcd"
-
-if os.environ.get('CONFIG_DIR'):
-    config_dir = os.environ.get('CONFIG_DIR')
-    if not config_dir:
-        print("No config directory provided")
-        exit()
-    config_file = os.path.join(config_dir, "config.yml")
-    external_config_file = os.path.join(config_dir, "external-config.yml")
-    if not os.path.exists(config_file):
-        print(f"Config file {config_file} does not exist")
-        exit()
-    if not os.path.exists(external_config_file):
-        print(f"External config file {external_config_file} does not exist")
-        exit()
-else:
-    print("No config directory provided")
-    exit()
-
 def do_print():
     try:
         with open(pidfile) as pid_file:
@@ -158,59 +121,51 @@ def setup_ppcie(cmd):
     cmd.extend([
         "-object", "iommufd,id=iommufd0",
 
-        "-device", "pcie-root-port,port=16,chassis=1,id=pci.1,bus=pcie.0,multifunction=on,addr=0x8",
+        "-device", "pcie-root-port,port=16,chassis=1,id=pci.1,bus=pcie.0,multifunction=on,addr=0x5",
         "-device", f"vfio-pci,host={gpus[0]},bus=pci.1,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb1,string=262144",
 
-        "-device", "pcie-root-port,port=17,chassis=2,id=pci.2,bus=pcie.0,addr=0x8.0x1",
+        "-device", "pcie-root-port,port=17,chassis=2,id=pci.2,bus=pcie.0,addr=0x5.0x1",
         "-device", f"vfio-pci,host={gpus[1]},bus=pci.2,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb2,string=262144",
 
-        "-device", "pcie-root-port,port=18,chassis=3,id=pci.3,bus=pcie.0,addr=0x8.0x2",
+        "-device", "pcie-root-port,port=18,chassis=3,id=pci.3,bus=pcie.0,addr=0x5.0x2",
         "-device", f"vfio-pci,host={gpus[2]},bus=pci.3,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb3,string=262144",
 
-        "-device", "pcie-root-port,port=19,chassis=4,id=pci.4,bus=pcie.0,addr=0x8.0x3",
+        "-device", "pcie-root-port,port=19,chassis=4,id=pci.4,bus=pcie.0,addr=0x5.0x3",
         "-device", f"vfio-pci,host={gpus[3]},bus=pci.4,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb4,string=262144",
 
-        "-device", "pcie-root-port,port=20,chassis=5,id=pci.5,bus=pcie.0,addr=0x8.0x4",
+        "-device", "pcie-root-port,port=20,chassis=5,id=pci.5,bus=pcie.0,addr=0x5.0x4",
         "-device", f"vfio-pci,host={gpus[4]},bus=pci.5,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb5,string=262144",
 
-        "-device", "pcie-root-port,port=21,chassis=6,id=pci.6,bus=pcie.0,addr=0x8.0x5",
+        "-device", "pcie-root-port,port=21,chassis=6,id=pci.6,bus=pcie.0,addr=0x5.0x5",
         "-device", f"vfio-pci,host={gpus[5]},bus=pci.6,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb6,string=262144",
 
-        "-device", "pcie-root-port,port=22,chassis=7,id=pci.7,bus=pcie.0,addr=0x8.0x6",
+        "-device", "pcie-root-port,port=22,chassis=7,id=pci.7,bus=pcie.0,addr=0x5.0x6",
         "-device", f"vfio-pci,host={gpus[6]},bus=pci.7,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb7,string=262144",
 
-        "-device", "pcie-root-port,port=23,chassis=8,id=pci.8,bus=pcie.0,addr=0x8.0x7",
+        "-device", "pcie-root-port,port=23,chassis=8,id=pci.8,bus=pcie.0,addr=0x5.0x7",
         "-device", f"vfio-pci,host={gpus[7]},bus=pci.8,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb8,string=262144",
 
-        "-device", "pcie-root-port,port=24,chassis=9,id=pci.9,bus=pcie.0,multifunction=on,addr=0x9",
+        "-device", "pcie-root-port,port=24,chassis=9,id=pci.9,bus=pcie.0,multifunction=on,addr=0x4",
         "-device", f"vfio-pci,host=0000:{nvswitches[0]},bus=pci.9,addr=0x0,iommufd=iommufd0",
-        "-device", "pcie-root-port,port=25,chassis=10,id=pci.10,bus=pcie.0,addr=0x9.0x1",
+        "-device", "pcie-root-port,port=25,chassis=10,id=pci.10,bus=pcie.0,addr=0x4.0x1",
         "-device", f"vfio-pci,host=0000:{nvswitches[1]},bus=pci.10,addr=0x0,iommufd=iommufd0",
-        "-device", "pcie-root-port,port=26,chassis=11,id=pci.11,bus=pcie.0,addr=0x9.0x2",
+        "-device", "pcie-root-port,port=26,chassis=11,id=pci.11,bus=pcie.0,addr=0x4.0x2",
         "-device", f"vfio-pci,host=0000:{nvswitches[2]},bus=pci.11,addr=0x0,iommufd=iommufd0",
-        "-device", "pcie-root-port,port=27,chassis=12,id=pci.12,bus=pcie.0,addr=0x9.0x3",
+        "-device", "pcie-root-port,port=27,chassis=12,id=pci.12,bus=pcie.0,addr=0x4.0x3",
         "-device", f"vfio-pci,host=0000:{nvswitches[3]},bus=pci.12,addr=0x0,iommufd=iommufd0",
     ])
 
 def do_run(img_path, gpus):
     print('Run VM')
     print(f'  Image: {img_path}')
-    print(f'  Kernel: {kernel}')
-    print(f'  Initrd: {initrd}')
-    if config_dir:
-        print(f'  Config file: {config_file}')
-        print(f'  External config file: {external_config_file}')
-    else:
-        print('  No config directory provided')
-
     if len(gpus):
         print(f'  Passthrough GPUs: {gpus}')
 
@@ -221,52 +176,33 @@ def do_run(img_path, gpus):
         cpu_args='host,-avx10'
 
     qemu_cmds = [
-        'qemu-system-x86_64',
+        '/home/shadeform/qemu/debian/qemu-system-x86/usr/bin/qemu-system-x86_64',
         '-accel', 'kvm',
-        '-m', f'{memory}M',
-        '-smp', f'{cpus}',
+        '-m', '100G',
+        '-smp', '32',
         '-name', f'{process_name},process={process_name},debug-threads=on',
         '-cpu', f'{cpu_args}',
         '-object', '{"qom-type":"tdx-guest","id":"tdx","quote-generation-socket":{"type": "vsock", "cid":"2","port":"4050"}}',
-        '-object', f'memory-backend-ram,id=mem0,size={memory}M',
+        '-object', 'memory-backend-ram,id=mem0,size=100G',
         '-machine', 'q35,kernel_irqchip=split,confidential-guest-support=tdx,memory-backend=mem0',
         '-bios', tdvf_params,
         '-nographic',
         '-nodefaults',
         '-vga', 'none',
         '-device', 'virtio-net-pci,netdev=nic0_td',
-        '-netdev', 'user,id=nic0_td',
-        '-device', 'virtio-net-pci,netdev=nic1_td',
-        '-netdev', f'user,id=nic1_td,hostfwd=tcp::{ssh_port}-:22,hostfwd=tcp::8443-:443',
+        '-netdev', f'user,id=nic0_td,hostfwd=tcp::{ssh_port}-:22',
         '-kernel', f'{kernel}',
         '-initrd', f'{initrd}',
-
-        '-append', cmdline,
-        '-drive', f'file={img_path},if=none,id=disk0,format=raw,readonly=on',
 		# '-append', 'root=/dev/sda1 console=ttyS0',
-        # '-drive', f'file={img_path},if=none,id=disk0,readonly=off',
-        '-device', 'virtio-scsi-pci,id=scsi0,disable-legacy=on,iommu_platform=true',
-        '-device', 'scsi-hd,drive=disk0',
-
+        '-append', 'readonly=on console=ttyS0 earlyprintk=serial root=/dev/sda2 tinfoil-debug=on tinfoil-config-hash=abcd',
+        '-hda', f'{img_path}',
         '-pidfile', pidfile
     ]
-
-    if config_dir:
-        for i, disk in enumerate([config_file, external_config_file, model_disk]):
-            qemu_cmds.extend([
-                "-drive", f"file={disk},if=none,id=disk{i+1},format=raw,readonly=on",
-                "-device", f"virtio-scsi-pci,id=scsi{i+1},disable-legacy=on,iommu_platform=true",
-                "-device", f"scsi-hd,drive=disk{i+1}"
-        ])
 
     if args.foreground:
         qemu_cmds.extend(['-serial', 'stdio'])
     else:
-        qemu_cmds.extend([
-            '-daemonize',
-            '-chardev', 'socket,id=char0,path=/tmp/tdx-guest-console,server=on,wait=off',
-            '-serial', 'chardev:char0'
-        ])
+        qemu_cmds.extend(['-daemonize'])
 
     add_vsock(qemu_cmds)
 
@@ -275,7 +211,6 @@ def do_run(img_path, gpus):
     else:
         add_gpus(qemu_cmds, gpus)
 
-    print(" ".join(qemu_cmds))
     subprocess.run(qemu_cmds, stderr=subprocess.STDOUT)
     do_print()
 

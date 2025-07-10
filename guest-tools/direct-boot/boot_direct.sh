@@ -25,11 +25,12 @@ if [[ -z "${UBUNTU_VERSION}" ]]; then
 fi
 
 PROCESS_NAME=td
-TDVF_FIRMWARE=/usr/share/ovmf/OVMF.fd
+TDVF_FIRMWARE=/home/shadeform/edk2/Build/IntelTdx/RELEASE_GCC5/FV/OVMF.fd
 
 KERNEL_FILE=$(realpath ${SCRIPT_DIR}/../image/vmlinuz-${UBUNTU_VERSION})
 INITRD_FILE=$(realpath ${SCRIPT_DIR}/../image/initrd.img-${UBUNTU_VERSION})
 TD_IMG=$(realpath ${SCRIPT_DIR}/../image/tdx-guest-ubuntu-${UBUNTU_VERSION}-generic.qcow2)
+
 
 if [[ ! -f "${KERNEL_FILE}" ]]; then
     echo "Missing kernel file: ${KERNEL_FILE}
@@ -50,6 +51,31 @@ if [[ ! -f "${TD_IMG}" ]]; then
 fi
 
 set -e
+
+echo "QEMU Command Line:"
+echo "qemu-system-x86_64 -accel kvm \
+                   -m 2G -smp 16 \
+                   -name ${PROCESS_NAME},process=${PROCESS_NAME},debug-threads=on \
+                   -cpu host \
+                   -object '{\"qom-type\":\"tdx-guest\",\"id\":\"tdx\",\"quote-generation-socket\":{\"type\": \"vsock\", \"cid\":\"2\",\"port\":\"4050\"}}' \
+                   -machine q35,kernel_irqchip=split,confidential-guest-support=tdx,hpet=off \
+                   -bios ${TDVF_FIRMWARE} \
+                   -nographic \
+                   -nodefaults \
+                   -kernel ${KERNEL_FILE} \
+                   -initrd ${INITRD_FILE} \
+		   -netdev user,id=nic0_td,hostfwd=tcp::{ssh_port}-:22 \
+                   -append \"root=/dev/sda1 console=ttyS0\" \
+                   -hda ${TD_IMG} \
+                   -serial stdio \
+                   -pidfile /tmp/tdx-demo-td-pid.pid"
+
+echo ""
+echo "File locations:"
+echo "TDVF_FIRMWARE: ${TDVF_FIRMWARE}"
+echo "KERNEL_FILE: ${KERNEL_FILE}"
+echo "INITRD_FILE: ${INITRD_FILE}"
+echo "TD_IMG: ${TD_IMG}"
 
 qemu-system-x86_64 -accel kvm \
 		   -m 2G -smp 16 \

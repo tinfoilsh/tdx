@@ -100,7 +100,7 @@ def setup_ppcie(cmd):
         print("PPCIe mode requires 4 NVSwitches")
         exit(1)
 
-    # prepare_gpus(gpus)
+    prepare_gpus(gpus)
 
     cmd.extend([
         "-object", "iommufd,id=iommufd0",
@@ -176,7 +176,9 @@ def do_run(img_path, gpus):
         '-device', 'virtio-net-pci,netdev=nic0_td',
         '-netdev', f'user,id=nic0_td,hostfwd=tcp::{ssh_port}-:22',
         '-drive', f'file={img_path},if=none,id=virtio-disk0',
-        '-device', 'virtio-blk-pci,drive=virtio-disk0',
+        '-device', 'virtio-blk-pci,drive=virtio-disk0,bootindex=1',
+        '-boot', 'order=c,strict=on',
+        '-boot', 'menu=off',
         '-pidfile', pidfile
     ]
 

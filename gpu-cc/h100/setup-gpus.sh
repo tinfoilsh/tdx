@@ -16,6 +16,8 @@
 # of MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
 
+set -e
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 PROJECT_DIR=$SCRIPT_DIR/../..
@@ -72,6 +74,12 @@ nvidia_nvlink_bdfs() {
     done < <(lspci -nn | grep "${NVIDIA_VENDOR_ID}" | grep "NVSwitch")
 }
 
+unbind_all() {
+    for device in $(ls /sys/bus/pci/drivers/vfio-pci/ | grep 0000); do
+        echo ${device} > /sys/bus/pci/drivers/vfio-pci/unbind
+    done
+}
+
 enable_cc_mode() {
     GPU_BDF=$1
     ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-ppcie-mode=off --reset-after-ppcie-mode-switch --gpu-bdf=${GPU_BDF}
@@ -80,7 +88,7 @@ enable_cc_mode() {
 
 enable_ppcie_mode() {
     GPU_BDF=$1
-    ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-cc-mode=off --reset-after-cc-mode-switch --gpu-bdf=${GPU_BDF}
+    ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-cc-mode=off --reset-after-cc-mode-switch --gpu-bdf=${GPU_BDF} || echo "unable to disable CC mode, may be nvswitch"
     ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-ppcie-mode=on --reset-after-ppcie-mode-switch --gpu-bdf=${GPU_BDF}
 }
 
@@ -95,12 +103,27 @@ gpus_bdfs() {
     echo ${GPUS_BDFS}
 }
 
+setup_vfio() {
+    modprobe vfio
+    modprobe vfio-pci
+    for device in 2331 2335 22a3; do
+        echo "10de ${device}" > /sys/bus/pci/drivers/vfio-pci/new_id || echo "${device} already allocated"
+    done
+}
+
 GPUS=$(gpus_bdfs)
+
+# for g in ${GPUS}; do
+#     ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-cc-mode=off --reset-after-cc-mode-switch --gpu-bdf=${g}
+#     ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-ppcie-mode=off --reset-after-ppcie-mode-switch --gpu-bdf=${g}
+# done
 
 if [ ! -z "$1" ]; then
     if [ "$1" != "*" ]; then
 	GPUS=${1//,/ }
     fi
+
+    setup_vfio
 
     # Setup NVSwitches
     if [ $(echo ${GPUS} | wc -w) -eq 8 ]; then
@@ -129,7 +152,9 @@ if [ ! -z "$1" ]; then
 	# qemu tries to bind to the iommufd object just after the previous instance
 	# has been stopped
 	virsh nodedev-reattach pci_${virsh_gpu_bdf} || true
-	virsh nodedev-detach pci_${virsh_gpu_bdf}
+    if [ ! -z "$(virsh nodedev-list | grep pci_${virsh_gpu_bdf})" ]; then
+        virsh nodedev-detach pci_${virsh_gpu_bdf}
+    fi
     done
 
     setup_udev
@@ -139,6 +164,10 @@ else
     echo ${GPUS}
     if [ $(echo ${GPUS} | wc -w) -eq 8 ]; then
         NVSWITCHES=$(nvidia_nvlink_bdfs)
+        # for g in ${NVSWITCHES}; do
+        #     ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-cc-mode=off --reset-after-cc-mode-switch --gpu-bdf=${g}
+        #     ./nvtrust/host_tools/python/nvidia_gpu_tools.py --set-ppcie-mode=off --reset-after-ppcie-mode-switch --gpu-bdf=${g}
+        # done
         echo "================================"
         echo "List of NVidia NVSwitches (PCI BDFs):"
         echo ${NVSWITCHES}

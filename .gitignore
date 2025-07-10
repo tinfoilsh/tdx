@@ -4,3 +4,5 @@ initrd*
 uki.efi*
 vmlinuz*
 nvtrust
+deployments/
+guest-tools/image/tdx-guest-*
