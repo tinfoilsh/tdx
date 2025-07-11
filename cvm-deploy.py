@@ -54,6 +54,10 @@ with open(config_yml) as f:
     config = yaml.safe_load(f)
 cvm_version = config["cvm-version"]
 
+if debug:
+    print("---- WARNING: DEBUG MODE ----")
+    cmdline += " tinfoil-debug=on"
+
 home = Path.home()
 prodimg = home / "prodimg"
 os.environ.update({
@@ -63,12 +67,8 @@ os.environ.update({
     "CONFIG_DIR": str(deployment_dir),
     "MEMORY": str(config["memory"]),
     "CPUS": str(config["cpus"]),
+    "CMDLINE": cmdline,
 })
-
-if debug:
-    print("---- WARNING: DEBUG MODE ----")
-else:
-    os.environ.update({"CMDLINE": cmdline})
 
 cmd = f"guest-tools/run_td_direct"
 
