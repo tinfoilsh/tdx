@@ -10,7 +10,7 @@ import yaml
 
 debug = True
 
-repo = "tinfoilsh/confidential-llama3-3-70b-fp8"
+repo = "tinfoilsh/confidential-large-llama-deepseek"
 external_config = {
     "domain": "example.com"
 }
