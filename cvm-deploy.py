@@ -72,11 +72,16 @@ else:
 
 cmd = f"guest-tools/run_td_direct"
 
-if config["models"]:
-    model = config["models"][0]
+model_disks = []
+for model in config["models"]:
     print(f"Adding model disk: {model['repo']}")
-    model_disk = f"/opt/tinfoil/modelpack/output/{model['repo'].replace('@', '/')}.mpk"
-    os.environ.update({"MODEL_DISK": model_disk})
+    disk = f"/opt/tinfoil/modelpack/output/{model['repo'].replace('@', '/')}.mpk"
+    model_disks.append(disk)
+    if not os.path.exists(disk):
+        print(f"Model disk {disk} not found")
+        exit(1)
+
+os.environ.update({"MODEL_DISKS": ",".join(model_disks)})
 
 if config["gpus"] == "full":
     cmd += " --gpus '*'"

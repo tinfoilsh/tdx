@@ -65,10 +65,10 @@ if os.environ.get('CPUS'):
 else:
     cpus=32
 
-if os.environ.get('MODEL_DISK'):
-    model_disk = os.environ.get('MODEL_DISK')
+if os.environ.get('MODEL_DISKS'):
+    model_disks = str(os.environ.get('MODEL_DISKS')).split(',')
 else:
-    model_disk = None
+    model_disks = []
 
 if os.environ.get('CMDLINE'):
     cmdline=os.environ.get('CMDLINE')
@@ -158,45 +158,45 @@ def setup_ppcie(cmd):
     cmd.extend([
         "-object", "iommufd,id=iommufd0",
 
-        "-device", "pcie-root-port,port=16,chassis=1,id=pci.1,bus=pcie.0,multifunction=on,addr=0x8",
+        "-device", "pcie-root-port,port=16,chassis=1,id=pci.1,bus=pcie.0,multifunction=on,addr=0x16",
         "-device", f"vfio-pci,host={gpus[0]},bus=pci.1,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb1,string=262144",
 
-        "-device", "pcie-root-port,port=17,chassis=2,id=pci.2,bus=pcie.0,addr=0x8.0x1",
+        "-device", "pcie-root-port,port=17,chassis=2,id=pci.2,bus=pcie.0,addr=0x16.0x1",
         "-device", f"vfio-pci,host={gpus[1]},bus=pci.2,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb2,string=262144",
 
-        "-device", "pcie-root-port,port=18,chassis=3,id=pci.3,bus=pcie.0,addr=0x8.0x2",
+        "-device", "pcie-root-port,port=18,chassis=3,id=pci.3,bus=pcie.0,addr=0x16.0x2",
         "-device", f"vfio-pci,host={gpus[2]},bus=pci.3,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb3,string=262144",
 
-        "-device", "pcie-root-port,port=19,chassis=4,id=pci.4,bus=pcie.0,addr=0x8.0x3",
+        "-device", "pcie-root-port,port=19,chassis=4,id=pci.4,bus=pcie.0,addr=0x16.0x3",
         "-device", f"vfio-pci,host={gpus[3]},bus=pci.4,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb4,string=262144",
 
-        "-device", "pcie-root-port,port=20,chassis=5,id=pci.5,bus=pcie.0,addr=0x8.0x4",
+        "-device", "pcie-root-port,port=20,chassis=5,id=pci.5,bus=pcie.0,addr=0x16.0x4",
         "-device", f"vfio-pci,host={gpus[4]},bus=pci.5,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb5,string=262144",
 
-        "-device", "pcie-root-port,port=21,chassis=6,id=pci.6,bus=pcie.0,addr=0x8.0x5",
+        "-device", "pcie-root-port,port=21,chassis=6,id=pci.6,bus=pcie.0,addr=0x16.0x5",
         "-device", f"vfio-pci,host={gpus[5]},bus=pci.6,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb6,string=262144",
 
-        "-device", "pcie-root-port,port=22,chassis=7,id=pci.7,bus=pcie.0,addr=0x8.0x6",
+        "-device", "pcie-root-port,port=22,chassis=7,id=pci.7,bus=pcie.0,addr=0x16.0x6",
         "-device", f"vfio-pci,host={gpus[6]},bus=pci.7,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb7,string=262144",
 
-        "-device", "pcie-root-port,port=23,chassis=8,id=pci.8,bus=pcie.0,addr=0x8.0x7",
+        "-device", "pcie-root-port,port=23,chassis=8,id=pci.8,bus=pcie.0,addr=0x16.0x7",
         "-device", f"vfio-pci,host={gpus[7]},bus=pci.8,addr=0x0,iommufd=iommufd0",
         "-fw_cfg", "name=opt/ovmf/X-PciMmio64Mb8,string=262144",
 
-        "-device", "pcie-root-port,port=24,chassis=9,id=pci.9,bus=pcie.0,multifunction=on,addr=0x9",
+        "-device", "pcie-root-port,port=24,chassis=9,id=pci.9,bus=pcie.0,multifunction=on,addr=0x17",
         "-device", f"vfio-pci,host=0000:{nvswitches[0]},bus=pci.9,addr=0x0,iommufd=iommufd0",
-        "-device", "pcie-root-port,port=25,chassis=10,id=pci.10,bus=pcie.0,addr=0x9.0x1",
+        "-device", "pcie-root-port,port=25,chassis=10,id=pci.10,bus=pcie.0,addr=0x17.0x1",
         "-device", f"vfio-pci,host=0000:{nvswitches[1]},bus=pci.10,addr=0x0,iommufd=iommufd0",
-        "-device", "pcie-root-port,port=26,chassis=11,id=pci.11,bus=pcie.0,addr=0x9.0x2",
+        "-device", "pcie-root-port,port=26,chassis=11,id=pci.11,bus=pcie.0,addr=0x17.0x2",
         "-device", f"vfio-pci,host=0000:{nvswitches[2]},bus=pci.11,addr=0x0,iommufd=iommufd0",
-        "-device", "pcie-root-port,port=27,chassis=12,id=pci.12,bus=pcie.0,addr=0x9.0x3",
+        "-device", "pcie-root-port,port=27,chassis=12,id=pci.12,bus=pcie.0,addr=0x17.0x3",
         "-device", f"vfio-pci,host=0000:{nvswitches[3]},bus=pci.12,addr=0x0,iommufd=iommufd0",
     ])
 
@@ -252,7 +252,7 @@ def do_run(img_path, gpus):
     ]
 
     if config_dir:
-        for i, disk in enumerate([config_file, external_config_file, model_disk]):
+        for i, disk in enumerate([config_file, external_config_file, *model_disks]):
             qemu_cmds.extend([
                 "-drive", f"file={disk},if=none,id=disk{i+1},format=raw,readonly=on",
                 "-device", f"virtio-scsi-pci,id=scsi{i+1},disable-legacy=on,iommu_platform=true",
